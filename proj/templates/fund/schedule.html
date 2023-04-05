@@ -1,0 +1,179 @@
+{% extends 'fund/base.html' %}
+{% block schedule %}active{% endblock %}
+
+{% block Content %}
+<div class="container-fluid">
+    <div id="loading">
+        <div id="spinner" class="spinner-border text-primary" style="width: 100px; height: 100px;" role="status">
+        </div>
+    </div>
+    <div class="container-fluid">
+        <br>
+        <!--検索フォーム-->
+        <form>
+            <div class="d-flex flex-row align-items-center py-4 mx-5" style="background-color: lightblue;">
+                <label class="mx-4">回次コード</label>
+                <input type="text" class="form-control" style="width:200px">
+                <label class="ms-5 me-4">決算日</label>
+                <input type="date" class="form-control" style="width:200px">
+                <label class="mx-2">～</label>
+                <input type="date" class="form-control" style="width:200px">
+                <label class="ms-5 me-4">銘柄種別</label>
+                <select class="form-control" style="width:200px">
+                    <option value=""></option>
+                    <option value="dog">Dog</option>
+                    <option value="cat">Cat</option>
+                    <option value="hamster">Hamster</option>
+                    <option value="parrot">Parrot</option>
+                    <option value="spider">Spider</option>
+                    <option value="goldfish">Goldfish</option>
+                </select>
+            </div>
+            <div class="d-flex flex-row align-items-center py-4 mx-5" style="background-color: lightgreen;">
+                <label class="mx-4">ファンド名</label>
+                <input type="text" class="form-control" style="width:300px">
+                <label class="ms-5 me-2">入力データ</label>
+                <select class="form-control" style="width:200px">
+                    <option value=""></option>
+                    <option value="dog">Dog</option>
+                    <option value="cat">Cat</option>
+                    <option value="hamster">Hamster</option>
+                    <option value="parrot">Parrot</option>
+                    <option value="spider">Spider</option>
+                    <option value="goldfish">Goldfish</option>
+                </select>
+                <label class="ms-2 me-2">時価取得</label>
+                <select class="form-control" style="width:200px">
+                    <option value=""></option>
+                    <option value="dog">Dog</option>
+                    <option value="cat">Cat</option>
+                    <option value="hamster">Hamster</option>
+                    <option value="parrot">Parrot</option>
+                    <option value="spider">Spider</option>
+                    <option value="goldfish">Goldfish</option>
+                </select>
+                <label class="ms-2 me-2">時価チェック結果</label>
+                <select class="form-control" style="width:200px">
+                    <option value=""></option>
+                    <option value="dog">Dog</option>
+                    <option value="cat">Cat</option>
+                    <option value="hamster">Hamster</option>
+                    <option value="parrot">Parrot</option>
+                    <option value="spider">Spider</option>
+                    <option value="goldfish">Goldfish</option>
+                </select>
+            </div>
+            <div class="d-flex flex-row align-items-center justify-content-end py-4 mx-5" style="background-color: lightblue;">
+                <button type="submit" class="btn btn-primary me-5" style="width:200px">
+                    検索
+                </button>
+
+            </div>
+
+        </form>
+        <!--検索フォーム-->
+        <br>
+        <!--中段-->
+        <div class="d-flex align-items-center justify-content-between p-2" style="background-color: lightpink;">
+            <h5 class="font-weight-bold text-primary">○件</h5>
+            <div class="d-flex flex-row align-items-center">
+                <div>
+                    <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" style="width:200px">
+                        チェックアクション
+                    </button>
+                    <ul class="dropdown-menu">
+                        <form method="POST" action="{% url 'fund:schedule_change_status' %}" name="ck1_form">
+                            {%csrf_token%}
+                            <input type="hidden" id=ck1_content name="ck1_content">
+                            <a class="dropdown-item" href="javascript:ck1_action();">
+                                １．チェックを完了する
+                            </a>
+                        </form>
+                    </ul>
+                </div>
+                <form action="" method="POST" class="mx-2">
+                    {%csrf_token%}
+                    <button id="update" type="submit" class="btn btn-primary" style="width:200px">
+                        ステータスアップデート
+                    </button>
+                </form>
+            </div>
+        </div>
+        <!--中段-->
+        <!--BTテーブル-->
+        <div class="table-responsive mx-5">
+            <table class="table table-bordered table-hover fs-6" id="dataTable" width="100%" cellspacing="0"
+                data-toggle="table" data-search="true" data-click-to-select="true">
+                <thead>
+                    <tr>
+                        <th data-checkbox="true"></th>
+                        <th data-halign="right" data-align="left" data-sortable="true">ファンドコード</th>
+                        <th>ファンド名</th>
+                        <th data-sortable="true">期末日</th>
+                        <th data-sortable="true">銘柄種別</th>
+                        <th>アクション</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {%for i in schedules%}
+                    <tr>
+                        <td></td>
+                        <td>{{i.fund_id}}</td>
+                        <td>{{i.fund_name}}</td>
+                        <td>{{i.date_close|date:"Y年m月d日"}}</td>
+                        <td>{{i.sec_type_jp}}</td>
+                        <td>
+                            <a href="{% url 'fund:fund_transfer' i.sec_type i.fund_id i.date_close %}"
+                                class="btn btn-primary btn-sm">個別ファンド</a>
+                        </td>
+                    </tr>
+                    {%endfor%}
+                </tbody>
+            </table>
+        </div>
+        <!--BTテーブル-->
+    </div>
+</div>
+
+<script>
+    // ステータスアップデート
+    // $(document).ready(function () {
+    //     $("#update").click(function () {
+    //         $(this).html(
+    //             '<span class="spinner-border spinner-border-sm" role="status">Loading...</span>'
+    //         );
+    //     });
+    // });
+    $("#update").click(function () {
+        $("#loading").css("display", "block");
+    });
+    // チェックアクション
+    var $table = $("#dataTable");
+    function ck1_action() {
+        document.getElementById("ck1_content").value = JSON.stringify($table.bootstrapTable('getSelections'));
+        document.ck1_form.submit();
+    }
+</script>
+
+<style>
+    #loading {
+        display: none;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        top: 0px;
+        left: 0px;
+        background: #000;
+        opacity: 0.6;
+        z-index: 1;
+    }
+
+    #spinner {
+        position: fixed;
+        z-index: 2;
+        top: 30%;
+        left: 50%;
+    }
+</style>
+
+{% endblock %}
