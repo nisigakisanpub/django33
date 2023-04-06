@@ -1,5 +1,6 @@
 {% extends 'fund/base.html' %}
 {% block schedule %}active{% endblock %}
+{% load static %}
 
 {% block Content %}
 <div class="container-fluid">
@@ -63,7 +64,8 @@
                     <option value="goldfish">Goldfish</option>
                 </select>
             </div>
-            <div class="d-flex flex-row align-items-center justify-content-end py-4 mx-5" style="background-color: lightblue;">
+            <div class="d-flex flex-row align-items-center justify-content-end py-4 mx-5"
+                style="background-color: lightblue;">
                 <button type="submit" class="btn btn-primary me-5" style="width:200px">
                     検索
                 </button>
@@ -78,7 +80,8 @@
             <h5 class="font-weight-bold text-primary">○件</h5>
             <div class="d-flex flex-row align-items-center">
                 <div>
-                    <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" style="width:200px">
+                    <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                        style="width:200px">
                         チェックアクション
                     </button>
                     <ul class="dropdown-menu">
@@ -100,13 +103,15 @@
             </div>
         </div>
         <!--中段-->
+        <br>
         <!--BTテーブル-->
         <div class="table-responsive mx-5">
             <table class="table table-bordered table-hover fs-6" id="dataTable" width="100%" cellspacing="0"
-                data-toggle="table" data-search="true" data-click-to-select="true">
+                data-toggle="table" data-search="false" data-click-to-select="false">
                 <thead>
                     <tr>
-                        <th data-checkbox="true"></th>
+                        <th></th>
+                        <th class="bs-checkbox" style="width: 36px;"><input name="btSelectAll" type="checkbox"></th>
                         <th data-halign="right" data-align="left" data-sortable="true">ファンドコード</th>
                         <th>ファンド名</th>
                         <th data-sortable="true">期末日</th>
@@ -116,8 +121,15 @@
                 </thead>
                 <tbody>
                     {%for i in schedules%}
-                    <tr>
-                        <td></td>
+                    <tr data-rowname="{{i.fund_id}}" data-sectype="{{i.sec_type}}">
+                        <td>
+                            {% if i.sec_type_jp == "全部" %}
+                            <div class="pc-kaihei" data-kaihei="plus">
+                                <img src="{% static 'fund/svg/plus.svg' %}" width="32" height="32">
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td class="bs-checkbox"><input name="btSelectItem" type="checkbox"></td>
                         <td>{{i.fund_id}}</td>
                         <td>{{i.fund_name}}</td>
                         <td>{{i.date_close|date:"Y年m月d日"}}</td>
@@ -136,14 +148,46 @@
 </div>
 
 <script>
-    // ステータスアップデート
-    // $(document).ready(function () {
-    //     $("#update").click(function () {
-    //         $(this).html(
-    //             '<span class="spinner-border spinner-border-sm" role="status">Loading...</span>'
-    //         );
-    //     });
-    // });
+    $(document).ready(function () {
+        // 開閉
+        $(".pc-kaihei").click(function () {
+            // "plus"⇔"minus"のトグル
+            let s_attr = $(this).attr('data-kaihei');
+            let new_src;
+            if (s_attr == "plus") {
+                new_src = "{% static 'fund/svg/dash.svg' %}";
+                $(this).attr('data-kaihei', "minus")
+            }
+            else {
+                new_src = "{% static 'fund/svg/plus.svg' %}";
+                $(this).attr('data-kaihei', "plus")
+            }
+            $(this).find("img").attr("src", new_src)
+            // 子<tr>の表示/非表示
+            let tr_self = $(this).parent().parent();
+            let rowname_self = tr_self.attr("data-rowname");
+            /*
+            tr_self.siblings().each(function () {
+                let rowname = $(this).attr("data-rowname");
+                if (rowname == rowname_self) {
+                    if (s_attr == "plus") {
+                        $(this).css("display", "none");
+                    }
+                    else {
+                        $(this).css("display", "table-row");
+                    }
+                }
+            });
+            */
+            if (s_attr == "plus") {
+                $("tr[data-rowname=" + rowname_self + "][data-sectype!='all']").css("display", "none");
+            }
+            else {
+                $("tr[data-rowname=" + rowname_self + "][data-sectype!='all']").css("display", "table-row");
+            }
+        });
+    });
+    // ステータスアップデートでスピナー表示
     $("#update").click(function () {
         $("#loading").css("display", "block");
     });
