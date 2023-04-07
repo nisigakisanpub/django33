@@ -111,7 +111,7 @@
                 <thead>
                     <tr>
                         <th></th>
-                        <th class="bs-checkbox" style="width: 36px;"><input name="btSelectAll" type="checkbox"></th>
+                        <th class="pc-tac"><input class="pc-checkbox-th" type="checkbox"></th>
                         <th data-halign="right" data-align="left" data-sortable="true">ファンドコード</th>
                         <th>ファンド名</th>
                         <th data-sortable="true">期末日</th>
@@ -124,12 +124,13 @@
                     <tr data-rowname="{{i.fund_id}}" data-sectype="{{i.sec_type}}">
                         <td>
                             {% if i.sec_type_jp == "全部" %}
-                            <div class="pc-kaihei" data-kaihei="plus">
-                                <img src="{% static 'fund/svg/plus.svg' %}" width="32" height="32">
+                            <div class="pc-kaihei" data-kaihei-state="open">
+                                <img src="{% static 'fund/svg/dash.svg' %}" width="32" height="32">
                             </div>
                             {% endif %}
                         </td>
-                        <td class="bs-checkbox"><input name="btSelectItem" type="checkbox"></td>
+                        <td style="text-align: center;"><input class="pc-checkbox" type="checkbox">
+                        </td>
                         <td>{{i.fund_id}}</td>
                         <td>{{i.fund_name}}</td>
                         <td>{{i.date_close|date:"Y年m月d日"}}</td>
@@ -149,18 +150,62 @@
 
 <script>
     $(document).ready(function () {
+        // チェックボックス(th)
+        $(".pc-checkbox-th").click(function () {
+            let state_th = $(this).prop('checked');
+            let elem_tr = $("tr > td > input")
+            elem_tr.each(function () {
+                $(this).prop({ indeterminate: false, checked: state_th })
+            });
+        });
+        // チェックボックス
+        $(".pc-checkbox").click(function () {
+            let tr_self = $(this).parent().parent();
+            let rowname_self = tr_self.attr("data-rowname");
+            let sectype_self = tr_self.attr("data-sectype");
+            let elem_all = $("tr[data-rowname=" + rowname_self + "][data-sectype='all'] > td > input")
+            let elem_noall = $("tr[data-rowname=" + rowname_self + "][data-sectype!='all'] > td > input")
+            let num_on = 0, num_off = 0;
+            if (sectype_self == "all") {
+                let state_all = elem_all.prop('checked');
+                elem_noall.each(function () {
+                    $(this).prop('checked', state_all)
+                });
+            }
+            else {
+                elem_noall.each(function () {
+                    if ($(this).prop('checked')) { num_on++; }
+                    else { num_off++ }
+                });
+                // チェックボックス(all)を制御する
+                if (num_on == 0) { elem_all.prop({ indeterminate: false, checked: false }) }
+                if (num_off == 0) { elem_all.prop({ indeterminate: false, checked: true }) }
+                if (num_on > 0 && num_off > 0) { elem_all.prop('indeterminate', true) }
+            }
+            // チェックボックス(th)を制御する
+            num_on = 0; num_off = 0;
+            let elem_tr = $("tr > td > input")
+            elem_tr.each(function () {
+                if ($(this).prop('checked')) { num_on++; }
+                else { num_off++ }
+            });
+            let elem_th = $(".pc-checkbox-th");
+            if (num_on == 0) { elem_th.prop({ indeterminate: false, checked: false }) }
+            if (num_off == 0) { elem_th.prop({ indeterminate: false, checked: true }) }
+            if (num_on > 0 && num_off > 0) { elem_th.prop('indeterminate', true) }
+        });
         // 開閉
         $(".pc-kaihei").click(function () {
             // "plus"⇔"minus"のトグル
-            let s_attr = $(this).attr('data-kaihei');
+            let s_attr = $(this).attr('data-kaihei-state');
             let new_src;
-            if (s_attr == "plus") {
-                new_src = "{% static 'fund/svg/dash.svg' %}";
-                $(this).attr('data-kaihei', "minus")
+            if (s_attr == "open") {
+                new_src = "{% static 'fund/svg/plus.svg' %}";
+                $(this).attr('data-kaihei-state', "close")
             }
             else {
-                new_src = "{% static 'fund/svg/plus.svg' %}";
-                $(this).attr('data-kaihei', "plus")
+                new_src = "{% static 'fund/svg/dash.svg' %}";
+                $(this).attr('data-kaihei-state', "open")
             }
             $(this).find("img").attr("src", new_src)
             // 子<tr>の表示/非表示
@@ -179,7 +224,7 @@
                 }
             });
             */
-            if (s_attr == "plus") {
+            if (s_attr == "open") {
                 $("tr[data-rowname=" + rowname_self + "][data-sectype!='all']").css("display", "none");
             }
             else {
@@ -217,6 +262,10 @@
         z-index: 2;
         top: 30%;
         left: 50%;
+    }
+
+    .pc-tac {
+        text-align: center;
     }
 </style>
 
