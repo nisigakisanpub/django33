@@ -23,6 +23,7 @@ def schedule(request):
             "date_close": datetime.datetime(2023, 1, 23),
             "sec_type": "all",
             "sec_type_jp": "全部",
+            "chosho_statu": "出力済み",
         },
         {
             "fund_id": "9998",
@@ -30,6 +31,7 @@ def schedule(request):
             "date_close": datetime.datetime(2023, 1, 23),
             "sec_type": "domestic_stock",
             "sec_type_jp": "内株",
+            "chosho_statu": "出力済み",
         },
         {
             "fund_id": "9998",
@@ -37,6 +39,7 @@ def schedule(request):
             "date_close": datetime.datetime(2023, 1, 23),
             "sec_type": "domestic_fund",
             "sec_type_jp": "内債",
+            "chosho_statu": "出力済み",
         },
         {
             "fund_id": "9997",
@@ -44,6 +47,7 @@ def schedule(request):
             "date_close": datetime.datetime(2023, 1, 23),
             "sec_type": "all",
             "sec_type_jp": "全部",
+            "chosho_statu": "データ待ち",
         },
         {
             "fund_id": "9997",
@@ -51,6 +55,7 @@ def schedule(request):
             "date_close": datetime.datetime(2023, 1, 23),
             "sec_type": "domestic_stock",
             "sec_type_jp": "内株",
+            "chosho_statu": "データ待ち",
         },
         {
             "fund_id": "9997",
@@ -58,6 +63,7 @@ def schedule(request):
             "date_close": datetime.datetime(2023, 1, 23),
             "sec_type": "domestic_fund",
             "sec_type_jp": "内債",
+            "chosho_statu": "データ待ち",
         },
     ]
     context = dict()

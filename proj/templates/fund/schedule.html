@@ -33,16 +33,14 @@
             <div class="d-flex flex-row align-items-center py-4 mx-5" style="background-color: lightgreen;">
                 <label class="mx-4">ファンド名</label>
                 <input type="text" class="form-control" style="width:300px">
-                <label class="ms-5 me-2">入力データ</label>
+                <label class="ms-5 me-2">調書状況</label>
                 <select class="form-control" style="width:200px">
                     <option value=""></option>
-                    <option value="dog">Dog</option>
-                    <option value="cat">Cat</option>
-                    <option value="hamster">Hamster</option>
-                    <option value="parrot">Parrot</option>
-                    <option value="spider">Spider</option>
-                    <option value="goldfish">Goldfish</option>
+                    <option value="出力済み">出力済み</option>
+                    <option value="データ待ち">データ待ち</option>
+                    <option value="不要">不要</option>
                 </select>
+                <!-- 
                 <label class="ms-2 me-2">時価取得</label>
                 <select class="form-control" style="width:200px">
                     <option value=""></option>
@@ -63,6 +61,7 @@
                     <option value="spider">Spider</option>
                     <option value="goldfish">Goldfish</option>
                 </select>
+-->
             </div>
             <div class="d-flex flex-row align-items-center justify-content-end py-4 mx-5"
                 style="background-color: lightblue;">
@@ -116,6 +115,7 @@
                         <th>ファンド名</th>
                         <th data-sortable="true">期末日</th>
                         <th data-sortable="true">銘柄種別</th>
+                        <th data-sortable="true">調書状況<br>MZ18</th>
                         <th>アクション</th>
                     </tr>
                 </thead>
@@ -136,8 +136,24 @@
                         <td>{{i.date_close|date:"Y年m月d日"}}</td>
                         <td>{{i.sec_type_jp}}</td>
                         <td>
-                            <a href="{% url 'fund:fund_transfer' i.sec_type i.fund_id i.date_close %}"
-                                class="btn btn-primary btn-sm">個別ファンド</a>
+                            {% if i.chosho_statu == "出力済み" %}
+                            <!-- <a href="C:\tmp">出力済み</a> -->
+                            <a href="C:\tmp" class="pc-tooltip1" data-bs-toggle="tooltip">出力済み</a>
+                            {% endif %}
+                            {% if i.chosho_statu == "データ待ち" %}
+                            <!-- <a class="" data-bs-toggle="modal" href="#exampleModalToggle">データ待ち</a> -->
+                            <!-- <a class="pc-popover" data-toggle="popover" data-content_div_id="popover_9997">データ待ち</a> -->
+                            <a
+                                href='JavaScript:open_modal("exampleModalToggle","{{i.fund_id}}","{{i.sec_type_jp}}",false)'>
+                                データ待ち
+                            </a>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <!-- <a href="{% url 'fund:fund_transfer' i.sec_type i.fund_id i.date_close %}"
+                                class="btn btn-primary btn-sm">調書作成</a> -->
+                            <a href='JavaScript:open_modal("exampleModalToggle","{{i.fund_id}}","{{i.sec_type_jp}}",true)'
+                                class="btn btn-primary btn-sm">調書作成</a>
                         </td>
                     </tr>
                     {%endfor%}
@@ -146,127 +162,177 @@
         </div>
         <!--BTテーブル-->
     </div>
-</div>
+    <!--モーダルダイアログとポップオーバー-->
+    <div>
+        <!--モーダルダイアログ-->
+        {% include 'fund/partials/modal.html' %}
+        <!--ポップオーバーの内容-->
+        {% include 'fund/partials/popover.html' %}
+    </div>
 
-<script>
-    $(document).ready(function () {
-        // チェックボックス(th)
-        $(".pc-checkbox-th").click(function () {
-            let state_th = $(this).prop('checked');
-            let elem_tr = $("tr > td > input")
-            elem_tr.each(function () {
-                $(this).prop({ indeterminate: false, checked: state_th })
-            });
-        });
-        // チェックボックス
-        $(".pc-checkbox").click(function () {
-            let tr_self = $(this).parent().parent();
-            let rowname_self = tr_self.attr("data-rowname");
-            let sectype_self = tr_self.attr("data-sectype");
-            let elem_all = $("tr[data-rowname=" + rowname_self + "][data-sectype='all'] > td > input")
-            let elem_noall = $("tr[data-rowname=" + rowname_self + "][data-sectype!='all'] > td > input")
-            let num_on = 0, num_off = 0;
-            if (sectype_self == "all") {
-                let state_all = elem_all.prop('checked');
-                elem_noall.each(function () {
-                    $(this).prop('checked', state_all)
+    <script>
+        $(document).ready(function () {
+            // チェックボックス(th)
+            $(".pc-checkbox-th").click(function () {
+                let state_th = $(this).prop('checked');
+                let elem_tr = $("tr > td > input")
+                elem_tr.each(function () {
+                    $(this).prop({ indeterminate: false, checked: state_th })
                 });
-            }
-            else {
-                elem_noall.each(function () {
+            });
+            // チェックボックス(tr)
+            $(".pc-checkbox").click(function () {
+                let tr_self = $(this).parent().parent();
+                let rowname_self = tr_self.attr("data-rowname");
+                let sectype_self = tr_self.attr("data-sectype");
+                let elem_all = $("tr[data-rowname=" + rowname_self + "][data-sectype='all'] > td > input")
+                let elem_noall = $("tr[data-rowname=" + rowname_self + "][data-sectype!='all'] > td > input")
+                let num_on = 0, num_off = 0;
+                if (sectype_self == "all") {
+                    let state_all = elem_all.prop('checked');
+                    elem_noall.each(function () {
+                        $(this).prop('checked', state_all)
+                    });
+                }
+                else {
+                    elem_noall.each(function () {
+                        if ($(this).prop('checked')) { num_on++; }
+                        else { num_off++ }
+                    });
+                    // チェックボックス(all)を制御する
+                    if (num_on == 0) { elem_all.prop({ indeterminate: false, checked: false }) }
+                    if (num_off == 0) { elem_all.prop({ indeterminate: false, checked: true }) }
+                    if (num_on > 0 && num_off > 0) { elem_all.prop('indeterminate', true) }
+                }
+                // チェックボックス(th)を制御する
+                num_on = 0; num_off = 0;
+                let elem_tr = $("tr > td > input")
+                elem_tr.each(function () {
                     if ($(this).prop('checked')) { num_on++; }
                     else { num_off++ }
                 });
-                // チェックボックス(all)を制御する
-                if (num_on == 0) { elem_all.prop({ indeterminate: false, checked: false }) }
-                if (num_off == 0) { elem_all.prop({ indeterminate: false, checked: true }) }
-                if (num_on > 0 && num_off > 0) { elem_all.prop('indeterminate', true) }
-            }
-            // チェックボックス(th)を制御する
-            num_on = 0; num_off = 0;
-            let elem_tr = $("tr > td > input")
-            elem_tr.each(function () {
-                if ($(this).prop('checked')) { num_on++; }
-                else { num_off++ }
+                let elem_th = $(".pc-checkbox-th");
+                if (num_on == 0) { elem_th.prop({ indeterminate: false, checked: false }) }
+                if (num_off == 0) { elem_th.prop({ indeterminate: false, checked: true }) }
+                if (num_on > 0 && num_off > 0) { elem_th.prop('indeterminate', true) }
             });
-            let elem_th = $(".pc-checkbox-th");
-            if (num_on == 0) { elem_th.prop({ indeterminate: false, checked: false }) }
-            if (num_off == 0) { elem_th.prop({ indeterminate: false, checked: true }) }
-            if (num_on > 0 && num_off > 0) { elem_th.prop('indeterminate', true) }
-        });
-        // 開閉
-        $(".pc-kaihei").click(function () {
-            // "plus"⇔"minus"のトグル
-            let s_attr = $(this).attr('data-kaihei-state');
-            let new_src;
-            if (s_attr == "open") {
-                new_src = "{% static 'fund/svg/plus.svg' %}";
-                $(this).attr('data-kaihei-state', "close")
-            }
-            else {
-                new_src = "{% static 'fund/svg/dash.svg' %}";
-                $(this).attr('data-kaihei-state', "open")
-            }
-            $(this).find("img").attr("src", new_src)
-            // 子<tr>の表示/非表示
-            let tr_self = $(this).parent().parent();
-            let rowname_self = tr_self.attr("data-rowname");
-            /*
-            tr_self.siblings().each(function () {
-                let rowname = $(this).attr("data-rowname");
-                if (rowname == rowname_self) {
-                    if (s_attr == "plus") {
-                        $(this).css("display", "none");
+            // 開閉
+            $(".pc-kaihei").click(function () {
+                // "plus"⇔"minus"のトグル
+                let s_attr = $(this).attr('data-kaihei-state');
+                let new_src;
+                if (s_attr == "open") {
+                    new_src = "{% static 'fund/svg/plus.svg' %}";
+                    $(this).attr('data-kaihei-state', "close")
+                }
+                else {
+                    new_src = "{% static 'fund/svg/dash.svg' %}";
+                    $(this).attr('data-kaihei-state', "open")
+                }
+                $(this).find("img").attr("src", new_src)
+                // 子<tr>の表示/非表示
+                let tr_self = $(this).parent().parent();
+                let rowname_self = tr_self.attr("data-rowname");
+                /*
+                tr_self.siblings().each(function () {
+                    let rowname = $(this).attr("data-rowname");
+                    if (rowname == rowname_self) {
+                        if (s_attr == "plus") {
+                            $(this).css("display", "none");
+                        }
+                        else {
+                            $(this).css("display", "table-row");
+                        }
                     }
-                    else {
-                        $(this).css("display", "table-row");
-                    }
+                });
+                */
+                if (s_attr == "open") {
+                    $("tr[data-rowname=" + rowname_self + "][data-sectype!='all']").css("display", "none");
+                }
+                else {
+                    $("tr[data-rowname=" + rowname_self + "][data-sectype!='all']").css("display", "table-row");
                 }
             });
-            */
-            if (s_attr == "open") {
-                $("tr[data-rowname=" + rowname_self + "][data-sectype!='all']").css("display", "none");
+            // Tooltip
+            $(".pc-tooltip1").tooltip({
+                title: "<h6>右クリックしてリンクアドレスをコピーしてください</h6>",
+                html: true
+            });
+            // hover event
+            $('.pc-tooltip2').hover(
+                function () {
+                    //マウスカーソルが重なった時の処理
+                    $(this).css('background-color', '#00f');
+                },
+                function () {
+                    //マウスカーソルが離れた時の処理
+                    $(this).css('background-color', 'transparent');
+                }
+            );
+            // Popover
+            $('.pc-popover').popover({
+                placement: 'top',
+                trigger: 'hover',
+                container: 'body',
+                title: '調書状況 MZ18',
+                html: true,
+                content: function () {
+                    var contentDivId = '#' + $(this).data('content_div_id');
+                    console.log($(contentDivId).html());
+                    return $(contentDivId).html();
+                },
+            });
+        });
+        // ステータスアップデートでスピナー表示
+        $("#update").click(function () {
+            $("#loading").css("display", "block");
+        });
+        // チェックアクション
+        var $table = $("#dataTable");
+        function ck1_action() {
+            document.getElementById("ck1_content").value = JSON.stringify($table.bootstrapTable('getSelections'));
+            document.ck1_form.submit();
+        }
+        // モーダルダイアログ
+        function open_modal(elem_Id, fund_id, sec_type_jp, action_sw) {
+            if (action_sw) {
+                $("#" + elem_Id).find(".modal-footer").css("display", "block");
             }
             else {
-                $("tr[data-rowname=" + rowname_self + "][data-sectype!='all']").css("display", "table-row");
+                $("#" + elem_Id).find(".modal-footer").css("display", "none");
             }
-        });
-    });
-    // ステータスアップデートでスピナー表示
-    $("#update").click(function () {
-        $("#loading").css("display", "block");
-    });
-    // チェックアクション
-    var $table = $("#dataTable");
-    function ck1_action() {
-        document.getElementById("ck1_content").value = JSON.stringify($table.bootstrapTable('getSelections'));
-        document.ck1_form.submit();
-    }
-</script>
+            $("#" + elem_Id).find(".modal-title").text(fund_id + " " + sec_type_jp);
+            $("#" + elem_Id).modal('show');
+        }
+    </script>
 
-<style>
-    #loading {
-        display: none;
-        position: fixed;
-        width: 100%;
-        height: 100%;
-        top: 0px;
-        left: 0px;
-        background: #000;
-        opacity: 0.6;
-        z-index: 1;
-    }
+    <style>
+        #loading {
+            display: none;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0px;
+            left: 0px;
+            background: #000;
+            opacity: 0.6;
+            z-index: 1;
+        }
 
-    #spinner {
-        position: fixed;
-        z-index: 2;
-        top: 30%;
-        left: 50%;
-    }
+        #spinner {
+            position: fixed;
+            z-index: 2;
+            top: 30%;
+            left: 50%;
+        }
 
-    .pc-tac {
-        text-align: center;
-    }
-</style>
+        .pc-tac {
+            text-align: center;
+        }
 
-{% endblock %}
+        #popover_content {
+            visibility: hidden
+        }
+    </style>
+
+    {% endblock %}
