@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class FundConfig(AppConfig):
+class PriceCheckConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'fund'
+    name = 'pricecheck'

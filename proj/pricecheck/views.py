@@ -8,7 +8,7 @@ from .forms import QueryForm
 
 
 def index(request):
-    return redirect("fund:schedule")
+    return redirect("pricecheck:schedule")
 
 
 def schedule(request):
@@ -77,7 +77,7 @@ def schedule(request):
     context = dict()
     context["schedules"] = schedules
 
-    return render(request, "fund/schedule.html", context)
+    return render(request, "pricecheck/schedule.html", context)
 
 
 def change_status(request):
@@ -91,21 +91,21 @@ def fund(request):
             fund_id = form.cleaned_data["fund_id"]
             as_of_date = form.cleaned_data["as_of_date"]
         context = {"form": form}
-        return render(request, "fund/fund.html", context)
+        return render(request, "pricecheck/fund.html", context)
     else:
         form = QueryForm()
         context = {"form": form}
-        return render(request, "fund/fund.html", context)
+        return render(request, "pricecheck/fund.html", context)
 
 
-def fund_transfer(request, sec_type, fund_id, date_close):
+def pricecheck_transfer(request, sec_type, fund_id, date_close):
     as_of_date = datetime.datetime.strptime(date_close, "%Y-%m-%d").date()
     initial_dict = dict(fund_id=fund_id, as_of_date=as_of_date)
     form = QueryForm(initial=initial_dict)
 
     context = {"form": form}
 
-    return render(request, "fund/fund.html", context)
+    return render(request, "pricecheck/pricecheck.html", context)
 
 
 def dashboard_divlist(request):
@@ -113,4 +113,4 @@ def dashboard_divlist(request):
 
     context = {"d_div": d_div}
 
-    return render(request, "fund/dashboard_divlist.html", context)
+    return render(request, "pricecheck/dashboard_divlist.html", context)

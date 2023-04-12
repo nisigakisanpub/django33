@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'fund.apps.FundConfig',
+    'pricecheck.apps.PriceCheckConfig',
 ]
 
 MIDDLEWARE = [

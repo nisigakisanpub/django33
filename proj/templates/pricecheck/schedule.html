@@ -1,4 +1,4 @@
-{% extends 'fund/base.html' %}
+{% extends 'pricecheck/base.html' %}
 {% block schedule %}active{% endblock %}
 {% load static %}
 {% load templatetags %}
@@ -61,7 +61,7 @@
                         チェックアクション
                     </button>
                     <ul class="dropdown-menu">
-                        <form method="POST" action="{% url 'fund:schedule_change_status' %}" name="ck1_form">
+                        <form method="POST" action="{% url 'pricecheck:schedule_change_status' %}" name="ck1_form">
                             {%csrf_token%}
                             <input type="hidden" id=ck1_content name="ck1_content">
                             <a class="dropdown-item" href="javascript:ck1_action();">
@@ -106,7 +106,7 @@
                         <td>
                             {% if i.sec_type == 0 %}
                             <div class="pc-kaihei" data-kaihei-state="open">
-                                <img src="{% static 'fund/svg/dash.svg' %}" width="32" height="32">
+                                <img src="{% static 'pricecheck/svg/dash.svg' %}" width="32" height="32">
                             </div>
                             {% endif %}
                         </td>
@@ -151,9 +151,9 @@
     <!--モーダルダイアログとポップオーバー-->
     <div>
         <!--モーダルダイアログ-->
-        {% include 'fund/partials/modal_国内株式.html' %}
+        {% include 'pricecheck/partials/modal_国内株式.html' %}
         <!--ポップオーバーの内容-->
-        {% include 'fund/partials/popover.html' %}
+        {% include 'pricecheck/partials/popover.html' %}
     </div>
 
     <script>
@@ -208,11 +208,11 @@
                 let s_attr = $(this).attr('data-kaihei-state');
                 let new_src;
                 if (s_attr == "open") {
-                    new_src = "{% static 'fund/svg/plus.svg' %}";
+                    new_src = "{% static 'pricecheck/svg/plus.svg' %}";
                     $(this).attr('data-kaihei-state', "close")
                 }
                 else {
-                    new_src = "{% static 'fund/svg/dash.svg' %}";
+                    new_src = "{% static 'pricecheck/svg/dash.svg' %}";
                     $(this).attr('data-kaihei-state', "open")
                 }
                 $(this).find("img").attr("src", new_src)
