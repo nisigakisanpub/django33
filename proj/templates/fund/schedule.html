@@ -1,6 +1,7 @@
 {% extends 'fund/base.html' %}
 {% block schedule %}active{% endblock %}
 {% load static %}
+{% load templatetags %}
 
 {% block Content %}
 <div class="container-fluid">
@@ -40,37 +41,13 @@
                     <option value="データ待ち">データ待ち</option>
                     <option value="不要">不要</option>
                 </select>
-                <!-- 
-                <label class="ms-2 me-2">時価取得</label>
-                <select class="form-control" style="width:200px">
-                    <option value=""></option>
-                    <option value="dog">Dog</option>
-                    <option value="cat">Cat</option>
-                    <option value="hamster">Hamster</option>
-                    <option value="parrot">Parrot</option>
-                    <option value="spider">Spider</option>
-                    <option value="goldfish">Goldfish</option>
-                </select>
-                <label class="ms-2 me-2">時価チェック結果</label>
-                <select class="form-control" style="width:200px">
-                    <option value=""></option>
-                    <option value="dog">Dog</option>
-                    <option value="cat">Cat</option>
-                    <option value="hamster">Hamster</option>
-                    <option value="parrot">Parrot</option>
-                    <option value="spider">Spider</option>
-                    <option value="goldfish">Goldfish</option>
-                </select>
--->
             </div>
             <div class="d-flex flex-row align-items-center justify-content-end py-4 mx-5"
                 style="background-color: lightblue;">
                 <button type="submit" class="btn btn-primary me-5" style="width:200px">
                     検索
                 </button>
-
             </div>
-
         </form>
         <!--検索フォーム-->
         <br>
@@ -109,21 +86,25 @@
                 data-toggle="table" data-search="false" data-click-to-select="false">
                 <thead>
                     <tr>
-                        <th></th>
-                        <th class="pc-tac"><input class="pc-checkbox-th" type="checkbox"></th>
-                        <th data-halign="right" data-align="left" data-sortable="true">ファンドコード</th>
-                        <th>ファンド名</th>
-                        <th data-sortable="true">期末日</th>
-                        <th data-sortable="true">銘柄種別</th>
-                        <th data-sortable="true">調書状況<br>MZ18</th>
-                        <th>アクション</th>
+                        <th rowspan="2"></th>
+                        <th rowspan="2" class="pc-tac"><input class="pc-checkbox-th" type="checkbox"></th>
+                        <th rowspan="2" data-align="left" data-sortable="true">ファンドコード</th>
+                        <th rowspan="2" data-sortable="true">ファンド名</th>
+                        <th rowspan="2" data-sortable="true">期末日</th>
+                        <th rowspan="2" data-sortable="false">銘柄種別</th>
+                        <th colspan="2" data-sortable="true">調書状況</th>
+                        <th rowspan="2">アクション</th>
+                    </tr>
+                    <tr>
+                        <th>MZ19</th>
+                        <th>MZ18</th>
                     </tr>
                 </thead>
                 <tbody>
                     {%for i in schedules%}
-                    <tr data-rowname="{{i.fund_id}}" data-sectype="{{i.sec_type}}">
+                    <tr data-rowname="{{i.fund_id}}" data-sectype="{{i.sec_type|to_name_en_sec_type}}">
                         <td>
-                            {% if i.sec_type_jp == "全部" %}
+                            {% if i.sec_type == 0 %}
                             <div class="pc-kaihei" data-kaihei-state="open">
                                 <img src="{% static 'fund/svg/dash.svg' %}" width="32" height="32">
                             </div>
@@ -134,26 +115,31 @@
                         <td>{{i.fund_id}}</td>
                         <td>{{i.fund_name}}</td>
                         <td>{{i.date_close|date:"Y年m月d日"}}</td>
-                        <td>{{i.sec_type_jp}}</td>
+                        <td>{{i.sec_type|to_name_jp_sec_type}}</td>
                         <td>
                             {% if i.chosho_statu == "出力済み" %}
-                            <!-- <a href="C:\tmp">出力済み</a> -->
                             <a href="C:\tmp" class="pc-tooltip1" data-bs-toggle="tooltip">出力済み</a>
                             {% endif %}
                             {% if i.chosho_statu == "データ待ち" %}
+                            <!-- モーダルを開く -->
                             <!-- <a class="" data-bs-toggle="modal" href="#exampleModalToggle">データ待ち</a> -->
+                            <!-- ポップオーバーを開く -->
                             <!-- <a class="pc-popover" data-toggle="popover" data-content_div_id="popover_9997">データ待ち</a> -->
                             <a
                                 href='JavaScript:open_modal("exampleModalToggle","{{i.fund_id}}","{{i.sec_type_jp}}",false)'>
                                 データ待ち
                             </a>
                             {% endif %}
+                            {% if i.chosho_statu == "計算中" %}
+                            計算中
+                            {% endif %}
                         </td>
+                        <td></td>
                         <td>
-                            <!-- <a href="{% url 'fund:fund_transfer' i.sec_type i.fund_id i.date_close %}"
-                                class="btn btn-primary btn-sm">調書作成</a> -->
+                            {% if i.sec_type > 0 %}
                             <a href='JavaScript:open_modal("exampleModalToggle","{{i.fund_id}}","{{i.sec_type_jp}}",true)'
-                                class="btn btn-primary btn-sm">調書作成</a>
+                                class="btn btn-primary btn-sm">調書手動作成</a>
+                            {% endif %}
                         </td>
                     </tr>
                     {%endfor%}
@@ -332,6 +318,10 @@
 
         #popover_content {
             visibility: hidden
+        }
+
+        table#dataTable>thead>tr>th {
+            vertical-align: middle;
         }
     </style>
 
